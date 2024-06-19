@@ -16,9 +16,10 @@ jobs:
       - name: Set up SSH
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.DEPLOY_KEY }}" | base64 -d > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
+          cat ~/.ssh/id_rsa
 
       - name: Log in to DockerHub
         run: |
@@ -35,6 +36,6 @@ jobs:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
         run: |
-          ssh $DEPLOY_USER@$DEPLOY_HOST '
+          ssh -o StrictHostKeyChecking=no -v $DEPLOY_USER@$DEPLOY_HOST '
           docker pull ${{ secrets.DOCKERHUB_USERNAME }}/carxpress-app:latest &&
           docker-compose -f /path/to/your/docker-compose.yml up -d'
