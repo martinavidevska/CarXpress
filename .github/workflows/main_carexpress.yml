@@ -28,11 +28,11 @@ jobs:
       - name: Push Docker image to DockerHub
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/carxpress-app:latest
 
-      - name: Deploy to server
-        env:
-          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
-          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-        run: |
-          ssh $DEPLOY_USER@$DEPLOY_HOST '
-          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/carxpress-app:latest &&
-          docker-compose -f /path/to/your/docker-compose.yml up -d'
+      # - name: Deploy to server
+      #   env:
+      #     DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      #     DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+      #   run: |
+      #     ssh $DEPLOY_USER@$DEPLOY_HOST '
+      #     docker pull ${{ secrets.DOCKERHUB_USERNAME }}/carxpress-app:latest &&
+      #     docker-compose -f /path/to/your/docker-compose.yml up -d'
