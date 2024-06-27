@@ -11,7 +11,7 @@ services:
       POSTGRES_DB: carxpress
     ports:
       - "5433:5432"
-#ova e mnogu vaznoo
+
     volumes:
       - ./db-postgres/postgres-data:/var/lib/postgresql/data
       - ./db-postgres/create.sql:/docker-entrypoint-initdb.d/create.sql
