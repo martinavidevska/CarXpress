@@ -19,7 +19,7 @@ services:
       - carxpress-net
 
   carxpress-app:
-    image: "martina337/carxpress-app:2.0"
+    image: "carxpress/app:2.0"
     container_name: carxpress_app
     environment:
       SPRING_APPLICATION_JSON: '{
