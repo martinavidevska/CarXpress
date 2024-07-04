@@ -11,7 +11,7 @@ services:
       POSTGRES_DB: carxpress
     ports:
       - "5433:5432"
-#ova e mnogu vaznoo
+
     volumes:
       - ./db-postgres/postgres-data:/var/lib/postgresql/data
       - ./db-postgres/create.sql:/docker-entrypoint-initdb.d/create.sql
@@ -19,7 +19,7 @@ services:
       - carxpress-net
 
   carxpress-app:
-    image: "carxpress/app:2.0"
+    image: "martina337/carxpress-app:2.0"
     container_name: carxpress_app
     environment:
       SPRING_APPLICATION_JSON: '{

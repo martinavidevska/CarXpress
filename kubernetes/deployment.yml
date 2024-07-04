@@ -1,0 +1,242 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: carxpress-config
+  namespace: carxpress
+data:
+  POSTGRES_DB: "carxpress"
+  POSTGRES_HOST: "postgres"
+  POSTGRES_URL: "postgres-service.carxpress.svc.cluster.local"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: carxpress-secret
+  namespace: carxpress
+type: Opaque
+data:
+  POSTGRES_USER: cG9zdGdyZXM=  
+  POSTGRES_PASSWORD: bGFwdXRhYW1h 
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: carxpress-app1
+  namespace: carxpress
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: carxpress-app1
+  template:
+    metadata:
+      labels:
+        app: carxpress-app1
+    spec:
+      containers:
+        - name: carxpress-app1
+          image: martina337/carxpress-app:2.0
+          ports:
+            - containerPort: 8080
+          env:
+            - name: POSTGRES_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: carxpress-config
+                  key: POSTGRES_DB
+            - name: POSTGRES_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: carxpress-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: carxpress-secret
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: carxpress-config
+                  key: POSTGRES_URL
+            - name: DATABASE_URL
+              value: "postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_URL):5432/$(POSTGRES_DB)"
+          envFrom:
+            - configMapRef:
+                name: carxpress-config
+            - secretRef:
+                name: carxpress-secret
+
+
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: carxpress-app
+#   labels:
+#     app: carxpress-app
+#   namespace: carxpress
+# spec:
+#   replicas: 3
+#   selector:
+#     matchLabels:
+#       app: carxpress-app
+#   template:
+#     metadata:
+#       labels:
+#         app: carxpress-app
+#     spec:
+#       containers:
+#       - name: carxpress-app
+#         image: martina337/carxpress-app:2.0
+#         ports:
+#         - containerPort: 8080
+#         envFrom:
+#         - configMapRef:
+#             name: carxpress-config
+#         env:
+#         - name: SPRING_DATASOURCE_URL
+#           value: "jdbc:postgresql://carxpress-db-service:5432/carxpress"
+#         - name: SPRING_DATASOURCE_USERNAME
+#           valueFrom:
+#             secretKeyRef:
+#               name: postgres-secret
+#               key: POSTGRES_USER
+#         - name: SPRING_DATASOURCE_PASSWORD
+#           valueFrom:
+#             secretKeyRef:
+#               name: postgres-secret
+#               key: POSTGRES_PASSWORD
+#         - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+#           value: "org.hibernate.dialect.PostgreSQLDialect"
+#         - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+#           value: "validate"
+#         resources:
+#           requests:
+#             memory: "128Mi"
+#             cpu: "250m"
+#           limits:
+#             memory: "256Mi"
+#             cpu: "500m"
+#   strategy:
+#     type: RollingUpdate
+#     rollingUpdate:
+#       maxSurge: 2
+#       maxUnavailable: 2
+# # apiVersion: apps/v1
+# # kind: Deployment
+# # metadata:
+# #   name: carxpress-app
+# #   namespace: carxpress
+# # spec:
+# #   replicas: 4
+# #   selector:
+# #     matchLabels:
+# #       app: carxpress-app
+# #   template:
+# #     metadata:
+# #       labels:
+# #         app: carxpress-app
+# #     spec:
+# #       containers:
+# #       - name: carxpress-app
+# #         image: martina337/carxpress-app:2.0
+# #         ports:
+# #         - containerPort: 8080
+# #         env:
+# #         - name: SPRING_APPLICATION_JSON
+# #           valueFrom:
+# #             configMapKeyRef:
+# #               name: carxpress-config
+# #               key: application.properties
+# #         - name: DB_HOST
+# #           value: "carxpress-db-service"  # Service name of your database
+# #         - name: DB_PORT
+# #           value: "5432"  # Port of your database service
+# #         - name: DB_NAME
+# #           valueFrom:
+# #             secretKeyRef:
+# #               name: postgres-secret
+# #               key: POSTGRES_DB
+# #         - name: DB_USER
+# #           valueFrom:
+# #             secretKeyRef:
+# #               name: postgres-secret
+# #               key: POSTGRES_USER
+# #         - name: DB_PASSWORD
+# #           valueFrom:
+# #             secretKeyRef:
+# #               name: postgres-secret
+# #               key: POSTGRES_PASSWORD
+# #         readinessProbe:
+# #           httpGet:
+# #             path: /actuator/health
+# #             port: 8080
+# #   strategy:
+# #     type: RollingUpdate
+# #     rollingUpdate:
+# #       maxSurge: 2
+# #       maxUnavailable: 2
+# # spring-boot-app.yml
+
+# # apiVersion: apps/v1
+# # kind: Deployment
+# # metadata:
+# #   name: spring-boot-postgres-sample
+# # spec:
+# #   replicas: 1
+# #   selector:
+# #     matchLabels:
+# #       app: spring-boot-postgres-sample
+# #   template:
+# #     metadata:
+# #       labels:
+# #         app: spring-boot-postgres-sample
+# #     spec:
+# #       containers:
+# #         - name: spring-boot-app
+# #           image: martina337/carxpress-app:2.0
+# #           env:
+# #             - name: SPRING_APPLICATION_JSON
+# #               value: |
+# #                 {
+# #                   "spring.datasource.url": "jdbc:postgresql://carxpress-db-service:5432/carxpress",
+# #                   "spring.datasource.username": "postgres",
+# #                   "spring.datasource.password": "laputaama",
+# #                   "spring.jpa.properties.hibernate.dialect": "org.hibernate.dialect.PostgreSQLDialect",
+# #                   "spring.jpa.hibernate.ddl-auto": "validate"
+# #                 }
+# #           ports:
+# #             - containerPort: 8080
+
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: carxpress-app
+#   namespace: carxpress
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: carxpress-app
+#   template:
+#     metadata:
+#       labels:
+#         app: carxpress-app
+#     spec:
+#       containers:
+#       - name: carxpress-app
+#         image: martina337/carxpress-app:2.0
+#         ports:
+#         - containerPort: 8080
+#         env:
+#         - name: SPRING_DATASOURCE_URL
+#           value: jdbc:postgresql://localhost:5433/carxpress
+#         - name: SPRING_DATASOURCE_USERNAME
+#           value: postgres
+#         - name: SPRING_DATASOURCE_PASSWORD
+#           value: laputaama
+#         - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+#           value: org.hibernate.dialect.PostgreSQLDialect
+#         - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+#           value: validate
+
